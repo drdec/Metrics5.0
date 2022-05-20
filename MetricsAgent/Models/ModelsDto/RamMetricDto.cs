@@ -9,4 +9,3 @@ namespace MetricsAgent.Models.ModelsDto
         public TimeSpan Time { get; set; }
     }
 }
-}
