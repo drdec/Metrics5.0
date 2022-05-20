@@ -128,7 +128,7 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsFromAllCluster(
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            return Ok();
+            return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
         }
     }
 }
