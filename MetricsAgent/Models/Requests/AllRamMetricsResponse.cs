@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using MetricsAgent.Models.Dto;
+using MetricsAgent.Models.ModelsDto;
 
 namespace MetricsAgent.Models.Requests
 {
-    public class AllCpuMetricsResponse
+    public class AllRamMetricsResponse
     {
-        public List<CpuMetricDto> Metrics { get; set; }
-
+        public List<RamMetricDto> Metrics { get; set; }
         public bool IsEmpty() => Metrics.Count == 0;
     }
 }

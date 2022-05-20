@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using MetricsAgent.Controllers.Interfaces;
+using MetricsAgent.Models.Dto;
 
 namespace MetricsAgent.Controllers
 {
@@ -38,9 +40,6 @@ namespace MetricsAgent.Controllers
 
             _cpuMetricsRepository.Create(cpuMetric);
 
-            // ДОМАШНЕЕ ЗАДАНИЕ
-            // TODO: 1. Добавьте логирование всех параметров в каждый контроллер в обоих проектах.
-
             if (_logger != null)
                 _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
 
@@ -55,6 +54,7 @@ namespace MetricsAgent.Controllers
             {
                 Metrics = new List<CpuMetricDto>()
             };
+
             foreach (var metric in metrics)
             {
                 response.Metrics.Add(new CpuMetricDto
@@ -64,7 +64,48 @@ namespace MetricsAgent.Controllers
                     Id = metric.Id
                 });
             }
-            return Ok(response);
+
+            if (_logger != null)
+                _logger.LogDebug("Успешно вернули данные cpu метрики");
+
+            return response.IsEmpty() ? Ok("empty") : Ok(response);
+        }
+
+        [HttpGet("get-by-id")]
+        public IActionResult GetById(int id)
+        {
+            var result = _cpuMetricsRepository.GetById(id);
+
+            if (_logger != null)
+            {
+                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult Delete(int id)
+        {
+            _cpuMetricsRepository.Delete(id);
+            if (_logger != null)
+            {
+                _logger.LogDebug($"cpu метрика успешно удалена : {id}");
+            }
+            return Ok();
+        }
+
+        [HttpPut("Update")]
+        public IActionResult Update(CpuMetric cpuMetric)
+        {
+            _cpuMetricsRepository.Update(cpuMetric);
+
+            if (_logger != null)
+            {
+                _logger.LogDebug($"cpu метрика успешно обновлена : {cpuMetric}");
+            }
+
+            return Ok();
         }
 
 
@@ -83,24 +124,11 @@ namespace MetricsAgent.Controllers
             }
         }
 
-
-
-
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster(
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
             return Ok();
         }
-
-        // TODO: Домашнее задание [Урок 2, пункт 2]
-        // В проект агента сбора метрик добавьте контроллеры для сбора метрик, аналогичные
-        // менеджеру сбора метрик.Добавьте методы для получения метрик с агента, доступные по
-        //следующим путям
-        // a. api/metrics/cpu/from/{fromTime}/to/{toTime} [ВЫПОЛНИЛИ ВМЕСТЕ]
-        // b. api / metrics / dotnet / errors - count / from /{ fromTime}/ to /{ toTime}
-        // c. api / metrics / network / from /{ fromTime}/ to /{ toTime}
-        // d. api / metrics / hdd / left / from /{ fromTime}/ to /{ toTime}
-        // e. api / metrics / ram / available / from /{ fromTime}/ to /{ toTime}
     }
 }

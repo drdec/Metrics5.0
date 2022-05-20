@@ -16,6 +16,8 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Threading.Tasks;
+using MetricsAgent.Controllers.Interfaces;
+using MetricsAgent.Services.Interfaces;
 
 namespace MetricsAgent
 {
@@ -35,6 +37,7 @@ namespace MetricsAgent
             ConfigureSqlLiteConnection(services);
 
             services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
+            services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>();
             services.AddControllers()
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(new CustomTimeSpanConverter()));

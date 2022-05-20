@@ -3,6 +3,7 @@ using MetricsAgent.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using MetricsAgent.Controllers.Interfaces;
 
 namespace MetricsAgent.Services
 {
@@ -30,6 +31,7 @@ namespace MetricsAgent.Services
                 // Выполнение команды
                 cmd.ExecuteNonQuery();
             }
+
             public void Delete(int id)
             {
                 using var connection = new SQLiteConnection(ConnectionString);
@@ -41,9 +43,12 @@ namespace MetricsAgent.Services
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
             }
+
             public void Update(CpuMetric item)
             {
                 using var connection = new SQLiteConnection(ConnectionString);
+                connection.Open();
+
                 using var cmd = new SQLiteCommand(connection);
                 // Прописываем в команду SQL-запрос на обновление данных
                 cmd.CommandText = "UPDATE cpumetrics SET value = @value, time = @time WHERE id = @id; ";
@@ -53,6 +58,7 @@ namespace MetricsAgent.Services
                 cmd.Prepare();
                 cmd.ExecuteNonQuery();
             }
+
             public IList<CpuMetric> GetAll()
             {
                 using var connection = new SQLiteConnection(ConnectionString);
@@ -83,7 +89,8 @@ namespace MetricsAgent.Services
                 using var connection = new SQLiteConnection(ConnectionString);
                 connection.Open();
                 using var cmd = new SQLiteCommand(connection);
-                cmd.CommandText = "SELECT * FROM cpumetrics WHERE id=@id";
+                cmd.CommandText = $"SELECT * FROM cpumetrics WHERE id={id}";
+
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     // Если удалось что-то прочитать
@@ -94,7 +101,7 @@ namespace MetricsAgent.Services
                         {
                             Id = reader.GetInt32(0),
                             Value = reader.GetInt32(1),
-                            Time = TimeSpan.FromSeconds(reader.GetInt32(1))
+                            Time = TimeSpan.FromSeconds(reader.GetInt32(2))
                         };
                     }
                     else
