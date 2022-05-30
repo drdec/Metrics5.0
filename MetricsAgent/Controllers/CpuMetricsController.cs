@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models.Dto;
 
@@ -81,7 +80,7 @@ namespace MetricsAgent.Controllers
                 _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
             }
 
-            return Ok(result);
+            return result == null ? Ok("sorry, data not found") : Ok(result);
         }
 
         [HttpDelete("delete")]
@@ -108,21 +107,6 @@ namespace MetricsAgent.Controllers
             return Ok();
         }
 
-
-        [HttpGet("sql-test")]
-        public IActionResult TryToSqlLite()
-        {
-            string cs = "Data Source=:memory:";
-            string stm = "SELECT SQLITE_VERSION()";
-            using (var con = new SQLiteConnection(cs))
-            {
-                con.Open();
-                using var cmd = new SQLiteCommand(stm, con);
-                string version = cmd.ExecuteScalar().ToString();
-                return Ok(version);
-
-            }
-        }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster(
