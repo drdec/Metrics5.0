@@ -2,130 +2,133 @@
 using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Services.Interfaces;
+using MySql.Data.MySqlClient;
 
 namespace MetricsAgent.Services
 {
-    //public class RamMetricsRepository : IRamMetricsRepository
-    //{
-    //    private const string ConnectionString = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100;";
+    public class RamMetricsRepository : IRamMetricsRepository
+    {
+        private const string ConnectionString = "server=localhost; user=root; database = metrics; password = 123456;";
 
-    //    public void Create(RamMetric item)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+        public void Create(RamMetric item)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "INSERT INTO ramworkmetrics(value, time) VALUES(@value, @time)";
-    //        cmd.Parameters.AddWithValue("@value", item.Value);
-    //        cmd.Parameters.AddWithValue("@time", item.Time);
+            string cmdText =
+                $"insert into ram_metrics(value, time)  values({item.Value}, {item.Time.TotalSeconds})";
 
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
+            var cmd = new MySqlCommand(cmdText, connection);
 
-    //    public void Delete(int id)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "DELETE FROM ramworkmetrics WHERE id=@id";
-    //        cmd.Parameters.AddWithValue("@id", id);
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
+        public void Delete(int id)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //    public IList<RamMetric> GetAll()
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            string cmdText = $"delete from ram_metrics where id = {id}";
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "SELECT * FROM ramworkmetrics";
-    //        var returnList = new List<RamMetric>();
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            while (reader.Read())
-    //            {
-    //                returnList.Add(new RamMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                });
-    //            }
-    //        }
-    //        return returnList;
-    //    }
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
 
-    //    public IList<RamMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
-    //        using var cmd = new SQLiteCommand(connection);
+        public IList<RamMetric> GetAll()
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        cmd.CommandText = "SELECT * FROM ramworkmetrics WHERE time >=@fromTime and time<=@toTime";
-    //        cmd.Parameters.AddWithValue("fromTime", fromTime.TotalSeconds);
-    //        cmd.Parameters.AddWithValue("toTime", toTime.TotalSeconds);
+            string cmdText = "select * from ram_metrics";
 
-    //        var result = new List<RamMetric>();
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            while (reader.Read())
-    //            {
-    //                result.Add(new RamMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                });
-    //            }
-    //        }
+            var returnList = new List<RamMetric>();
 
-    //        return result;
-    //    }
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    returnList.Add(new RamMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    });
+                }
+            }
+            return returnList;
+        }
 
-    //    public RamMetric GetById(int id)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+        public IList<RamMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = $"SELECT * FROM ramworkmetrics WHERE id={id}";
+            string cmdText = $"select * from ram_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            if (reader.Read())
-    //            {
-    //                return new RamMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                };
-    //            }
-    //            else
-    //            {
-    //                return null;
-    //            }
-    //        }
-    //    }
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //    public void Update(RamMetric item)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            var result = new List<RamMetric>();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "UPDATE ramworkmetrics SET value = @value, time = @time WHERE id = @id; ";
-    //        cmd.Parameters.AddWithValue("@id", item.Id);
-    //        cmd.Parameters.AddWithValue("@value", item.Value);
-    //        cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    result.Add(new RamMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    });
+                }
+            }
 
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
-    //}
+            return result;
+        }
+
+        public RamMetric GetById(int id)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            string cmdText = $"select * from ram_metrics where id = {id}";
+
+            using var cmd = new MySqlCommand(cmdText, connection);
+
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return new RamMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public void Update(RamMetric item)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            string cmdText =
+                $"update ram_metrics set value = {item.Value}, time = {item.Time.TotalSeconds} where id = {item.Id}";
+
+            using var cmd = new MySqlCommand(cmdText, connection);
+
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
+    }
 }

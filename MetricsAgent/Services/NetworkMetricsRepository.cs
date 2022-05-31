@@ -2,130 +2,133 @@
 using MetricsAgent.Models;
 using MetricsAgent.Services.Interfaces;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
 namespace MetricsAgent.Services
-{ 
-    //public class NetworkMetricsRepository : INetworkMetricsRepository
-    //{
-    //    private const string ConnectionString = "Data Source=metrics.db;Version=3;Pooling=true;Max Pool Size=100;";
+{
+    public class NetworkMetricsRepository : INetworkMetricsRepository
+    {
+        private const string ConnectionString = "server=localhost; user=root; database = metrics; password = 123456;";
 
-    //    public void Create(NetworkMetric item)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+        public void Create(NetworkMetric item)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "INSERT INTO networkmetrics(value, time) VALUES(@value, @time)";
-    //        cmd.Parameters.AddWithValue("@value", item.Value);
-    //        cmd.Parameters.AddWithValue("@time", item.Time);
+            string cmdText =
+                $"insert into network_metrics(value, time)  values({item.Value}, {item.Time.TotalSeconds})";
 
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
+            var cmd = new MySqlCommand(cmdText, connection);
 
-    //    public void Delete(int id)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "DELETE FROM networkmetrics WHERE id=@id";
-    //        cmd.Parameters.AddWithValue("@id", id);
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
+        public void Delete(int id)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //    public IList<NetworkMetric> GetAll()
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            string cmdText = $"delete from network_metrics where id = {id}";
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "SELECT * FROM networkmetrics";
-    //        var returnList = new List<NetworkMetric>();
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            while (reader.Read())
-    //            {
-    //                returnList.Add(new NetworkMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                });
-    //            }
-    //        }
-    //        return returnList;
-    //    }
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
 
-    //    public IList<NetworkMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
-    //        using var cmd = new SQLiteCommand(connection);
+        public IList<NetworkMetric> GetAll()
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        cmd.CommandText = "SELECT * FROM networkmetrics WHERE time >=@fromTime and time<=@toTime";
-    //        cmd.Parameters.AddWithValue("fromTime", fromTime.TotalSeconds);
-    //        cmd.Parameters.AddWithValue("toTime", toTime.TotalSeconds);
+            string cmdText = "select * from network_metrics";
 
-    //        var result = new List<NetworkMetric>();
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            while (reader.Read())
-    //            {
-    //                result.Add(new NetworkMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                });
-    //            }
-    //        }
+            var returnList = new List<NetworkMetric>();
 
-    //        return result;
-    //    }
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    returnList.Add(new NetworkMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    });
+                }
+            }
+            return returnList;
+        }
 
-    //    public NetworkMetric GetById(int id)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+        public IList<NetworkMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = $"SELECT * FROM networkmetrics WHERE id={id}";
+            string cmdText = $"select * from network_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
 
-    //        using (SQLiteDataReader reader = cmd.ExecuteReader())
-    //        {
-    //            if (reader.Read())
-    //            {
-    //                return new NetworkMetric
-    //                {
-    //                    Id = reader.GetInt32(0),
-    //                    Value = reader.GetInt32(1),
-    //                    Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-    //                };
-    //            }
-    //            else
-    //            {
-    //                return null;
-    //            }
-    //        }
-    //    }
+            using var cmd = new MySqlCommand(cmdText, connection);
 
-    //    public void Update(NetworkMetric item)
-    //    {
-    //        using var connection = new SQLiteConnection(ConnectionString);
-    //        connection.Open();
+            var result = new List<NetworkMetric>();
 
-    //        using var cmd = new SQLiteCommand(connection);
-    //        cmd.CommandText = "UPDATE networkmetrics SET value = @value, time = @time WHERE id = @id; ";
-    //        cmd.Parameters.AddWithValue("@id", item.Id);
-    //        cmd.Parameters.AddWithValue("@value", item.Value);
-    //        cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    result.Add(new NetworkMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    });
+                }
+            }
 
-    //        cmd.Prepare();
-    //        cmd.ExecuteNonQuery();
-    //    }
-    //}
+            return result;
+        }
+
+        public NetworkMetric GetById(int id)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            string cmdText = $"select * from network_metrics where id = {id}";
+
+            using var cmd = new MySqlCommand(cmdText, connection);
+
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    return new NetworkMetric
+                    {
+                        Id = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public void Update(NetworkMetric item)
+        {
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            string cmdText =
+                $"update network_metrics set value = {item.Value}, time = {item.Time.TotalSeconds} where id = {item.Id}";
+
+            using var cmd = new MySqlCommand(cmdText, connection);
+
+            cmd.Prepare();
+            cmd.ExecuteNonQuery();
+        }
+    }
 }

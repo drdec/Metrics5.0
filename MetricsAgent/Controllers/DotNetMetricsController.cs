@@ -6,6 +6,7 @@ using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.Services;
 
 namespace MetricsAgent.Controllers
 {
@@ -68,11 +69,13 @@ namespace MetricsAgent.Controllers
             return Ok();
         }
 
+
         [HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
         public IActionResult GetDotNetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            return Ok();
+            return Ok(_dotNetMetricsRepository.GetErrorsCount(fromTime, toTime));
         }
+
 
         [HttpGet("get-all")]
         public IActionResult GetAllItems()

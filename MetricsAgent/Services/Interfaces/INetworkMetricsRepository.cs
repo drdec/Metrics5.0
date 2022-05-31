@@ -4,5 +4,6 @@ namespace MetricsAgent.Services.Interfaces
 {
     public interface INetworkMetricsRepository : IRepository<NetworkMetric>
     {
+
     }
 }
