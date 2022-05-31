@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models.Dto;
 
@@ -15,16 +16,19 @@ namespace MetricsAgent.Controllers
     public class CpuMetricsController : ControllerBase
     {
 
-        private ICpuMetricsRepository _cpuMetricsRepository;
-        private ILogger<CpuMetricsController> _logger;
+        private readonly ICpuMetricsRepository _cpuMetricsRepository;
+        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly IMapper _mapper;
 
 
         public CpuMetricsController(
+            IMapper mapper,
             ILogger<CpuMetricsController> logger,
             ICpuMetricsRepository cpuMetricsRepository)
         {
             _cpuMetricsRepository = cpuMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
@@ -33,7 +37,7 @@ namespace MetricsAgent.Controllers
         {
             CpuMetric cpuMetric = new CpuMetric
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -48,6 +52,13 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
+            MapperConfiguration config = new MapperConfiguration(
+                cfg => cfg.CreateMap<CpuMetric, CpuMetricDto>().
+                    ForMember(x=> x.Time, opt 
+                        => opt.MapFrom(src => TimeSpan.FromSeconds(src.Time))));
+
+            IMapper mapper = config.CreateMapper();
+
             var metrics = _cpuMetricsRepository.GetAll();
             var response = new AllCpuMetricsResponse()
             {
@@ -56,12 +67,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new CpuMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(mapper.Map<CpuMetricDto>(metric));
             }
 
             if (_logger != null)

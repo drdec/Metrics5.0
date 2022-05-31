@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Transactions;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models;
 using MySql.Data.MySqlClient;
+using Dapper;
 
 namespace MetricsAgent.Services
 {
@@ -15,120 +18,48 @@ namespace MetricsAgent.Services
         public void Create(CpuMetric item)
         {
             using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
 
-            string cmdText =
-                $"insert into cpu_metrics(value, time)  values({item.Value}, {item.Time.TotalSeconds})";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            connection.Execute($"insert into cpu_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
         public void Delete(int id)
         {
             using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
 
-            string cmdText = $"delete from cpu_metrics where id = {id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            connection.Execute($"delete from cpu_metrics where id = {id}");
         }
 
         public void Update(CpuMetric item)
         {
             using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
 
-            string cmdText =
-                $"update cpu_metrics set value = {item.Value}, time = {item.Time.TotalSeconds} where id = {item.Id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            connection.Execute(
+                $"update cpu_metrics set value = {item.Value}, time = {item.Time} " +
+                $"where id = {item.Id}");
         }
 
         public IList<CpuMetric> GetAll()
         {
             using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
 
-            string cmdText = "select * from cpu_metrics";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-            
-            var returnList = new List<CpuMetric>();
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    returnList.Add(new CpuMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    });
-                }
-            }
-            return returnList;
+            List<CpuMetric> result = connection.Query<CpuMetric>("select * from cpumetrics").ToList();
+            return result;
         }
 
         public IList<CpuMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
+            var connection = new MySqlConnection(ConnectionString);
 
-            string cmdText = $"select * from cpu_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            var result = new List<CpuMetric>();
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    result.Add(new CpuMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    });
-                }
-            }
-
-            return result;
+            return connection
+                .Query<CpuMetric>($"select * from cpumetrics where time >= {fromTime.TotalSeconds} " +
+                                  $"and time <= {toTime.TotalSeconds}").ToList();
         }
 
         public CpuMetric GetById(int id)
         {
             using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
 
-            string cmdText = $"select * from cpu_metrics where id = {id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    return new CpuMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    };
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            return connection.QuerySingle<CpuMetric>($"select * from cpumetric where id = {id}");
         }
     }
 }
