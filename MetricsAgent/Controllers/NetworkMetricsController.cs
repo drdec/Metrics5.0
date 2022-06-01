@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models;
-using MetricsAgent.Models.Dto;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
@@ -17,14 +17,16 @@ namespace MetricsAgent.Controllers
     {
         private readonly INetworkMetricsRepository _networkMetricsRepository;
         private readonly ILogger<NetworkMetricsController> _logger;
-
+        private readonly IMapper _mapper;
 
         public NetworkMetricsController(
             ILogger<NetworkMetricsController> logger,
-            INetworkMetricsRepository networkMetricsRepository)
+            INetworkMetricsRepository networkMetricsRepository,
+            IMapper mapper)
         {
             _networkMetricsRepository = networkMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
@@ -56,12 +58,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new NetworkMetricDto
-                {
-                    Time = TimeSpan.FromSeconds(metric.Time),
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
             if (_logger != null)

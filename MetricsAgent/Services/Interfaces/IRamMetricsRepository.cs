@@ -4,5 +4,6 @@ namespace MetricsAgent.Services.Interfaces
 {
     public interface IRamMetricsRepository : IRepository<RamMetric>
     {
+        bool IsAvailable();
     }
 }

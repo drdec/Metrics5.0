@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
-using MetricsAgent.Models.Dto;
+using MetricsAgent.Models.ModelsDto;
 
 namespace MetricsAgent.Controllers
 {

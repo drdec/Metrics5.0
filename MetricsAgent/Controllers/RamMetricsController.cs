@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -16,14 +17,16 @@ namespace MetricsAgent.Controllers
 
         private readonly IRamMetricsRepository _ramMetricsRepository;
         private readonly ILogger<RamMetricsController> _logger;
-
+        private readonly IMapper _mapper;
 
         public RamMetricsController(
             ILogger<RamMetricsController> logger,
-            IRamMetricsRepository ramMetricsRepository)
+            IRamMetricsRepository ramMetricsRepository,
+            IMapper mapper)
         {
             _ramMetricsRepository = ramMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
@@ -55,12 +58,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new RamMetricDto
-                {
-                    Time = TimeSpan.FromSeconds(metric.Time),
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
             if (_logger != null)
@@ -108,9 +106,9 @@ namespace MetricsAgent.Controllers
         }
 
         [HttpGet("available")]
-        public IActionResult GetRamMetrics()
+        public IActionResult IsAvailable()
         {
-            return Ok();
+            return Ok(_ramMetricsRepository.IsAvailable());
         }
     }
 }

@@ -6,6 +6,8 @@ using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using IMapper = AutoMapper.IMapper;
+using Mapper = AutoMapper.Mapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -16,14 +18,17 @@ namespace MetricsAgent.Controllers
 
         private readonly IHddMetricsRepository _hddMetricsRepository;
         private readonly ILogger<HddMetricsController> _logger;
+        private readonly IMapper _mapper;
 
 
         public HddMetricsController(
             ILogger<HddMetricsController> logger,
-            IHddMetricsRepository hddMetricsRepository)
+            IHddMetricsRepository hddMetricsRepository,
+            IMapper mapper)
         {
             _hddMetricsRepository = hddMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
@@ -55,12 +60,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new HddMetricDto
-                {
-                    Time = TimeSpan.FromSeconds(metric.Time),
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<HddMetricDto>(metric));
             }
 
             if (_logger != null)

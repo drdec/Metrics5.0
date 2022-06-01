@@ -55,5 +55,11 @@ namespace MetricsAgent.Services
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
             connection.Execute($"update ram_metrics set value = {item.Value}, time = {item.Time} where id = {item.Id}");
         }
+
+        public bool IsAvailable()
+        {
+            //заглушка, пока не знаю, что сюда добавить
+            return true;
+        }
     }
 }

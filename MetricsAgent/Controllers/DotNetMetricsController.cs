@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using AutoMapper;
 using MetricsAgent.Models;
-using MetricsAgent.Models.Dto;
+using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,16 @@ namespace MetricsAgent.Controllers
     {
         private readonly IDotNetMetricsRepository _dotNetMetricsRepository;
         private readonly ILogger<DotNetMetricsController> _logger;
+        private readonly IMapper _mapper;
 
-        public DotNetMetricsController(IDotNetMetricsRepository dotNetMetricsRepository, ILogger<DotNetMetricsController> logger)
+        public DotNetMetricsController(
+            IDotNetMetricsRepository dotNetMetricsRepository, 
+            ILogger<DotNetMetricsController> logger,
+            IMapper mapper)
         {
             _dotNetMetricsRepository = dotNetMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
@@ -88,12 +94,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new DotNetMetricDto
-                {
-                    Time = TimeSpan.FromSeconds(metric.Time),
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
             }
 
             if (_logger != null)

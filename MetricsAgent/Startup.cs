@@ -45,10 +45,29 @@ namespace MetricsAgent
                     Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
                 });
             
-            services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>();
-            services.AddScoped<IHddMetricsRepository, HddMetricsRepository>();
-            services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>();
-            services.AddScoped<IRamMetricsRepository, RamMetricsRepository>();
+            services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>().
+                Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
+
+            services.AddScoped<IHddMetricsRepository, HddMetricsRepository>().
+                Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
+
+            services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>().
+                Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
+
+            services.AddScoped<IRamMetricsRepository, RamMetricsRepository>().
+                Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
 
             services.AddControllers()
                 .AddJsonOptions(options =>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MetricsAgent.Models.Dto
+namespace MetricsAgent.Models.ModelsDto
 {
     public class DotNetMetricDto
     {
