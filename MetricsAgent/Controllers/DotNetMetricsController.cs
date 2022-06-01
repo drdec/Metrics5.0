@@ -14,8 +14,8 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class DotNetMetricsController : Controller
     {
-        private IDotNetMetricsRepository _dotNetMetricsRepository;
-        private ILogger<DotNetMetricsController> _logger;
+        private readonly IDotNetMetricsRepository _dotNetMetricsRepository;
+        private readonly ILogger<DotNetMetricsController> _logger;
 
         public DotNetMetricsController(IDotNetMetricsRepository dotNetMetricsRepository, ILogger<DotNetMetricsController> logger)
         {
@@ -26,9 +26,9 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] DotNetMetricsCreateRequest request)
         {
-            DotNetMetric metrics = new DotNetMetric()
+            DotNetMetric metrics = new()
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -90,7 +90,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new DotNetMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds(metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });

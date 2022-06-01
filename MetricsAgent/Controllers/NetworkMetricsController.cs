@@ -15,8 +15,8 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class NetworkMetricsController : Controller
     {
-        private INetworkMetricsRepository _networkMetricsRepository;
-        private ILogger<NetworkMetricsController> _logger;
+        private readonly INetworkMetricsRepository _networkMetricsRepository;
+        private readonly ILogger<NetworkMetricsController> _logger;
 
 
         public NetworkMetricsController(
@@ -31,9 +31,9 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
         {
-            NetworkMetric networkMetric = new NetworkMetric
+            NetworkMetric networkMetric = new()
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -58,7 +58,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new NetworkMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds(metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });

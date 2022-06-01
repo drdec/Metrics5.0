@@ -39,7 +39,12 @@ namespace MetricsAgent
             var mapper = mapperConfiguration.CreateMapper();
             services.AddSingleton(mapper);
 
-            services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>();
+            services.AddScoped<ICpuMetricsRepository, CpuMetricsRepository>().
+                Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
+            
             services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>();
             services.AddScoped<IHddMetricsRepository, HddMetricsRepository>();
             services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>();

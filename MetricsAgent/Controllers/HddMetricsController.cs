@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -13,8 +14,8 @@ namespace MetricsAgent.Controllers
     public class HddMetricsController : Controller
     {
 
-        private IHddMetricsRepository _hddMetricsRepository;
-        private ILogger<HddMetricsController> _logger;
+        private readonly IHddMetricsRepository _hddMetricsRepository;
+        private readonly ILogger<HddMetricsController> _logger;
 
 
         public HddMetricsController(
@@ -31,7 +32,7 @@ namespace MetricsAgent.Controllers
         {
             var hddMetric = new HddMetric()
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -56,7 +57,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new HddMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds(metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });

@@ -35,7 +35,7 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricCreateRequest request)
         {
-            CpuMetric cpuMetric = new CpuMetric
+            CpuMetric cpuMetric = new ()
             {
                 Time = request.Time.TotalSeconds,
                 Value = request.Value
@@ -52,13 +52,6 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            MapperConfiguration config = new MapperConfiguration(
-                cfg => cfg.CreateMap<CpuMetric, CpuMetricDto>().
-                    ForMember(x=> x.Time, opt 
-                        => opt.MapFrom(src => TimeSpan.FromSeconds(src.Time))));
-
-            IMapper mapper = config.CreateMapper();
-
             var metrics = _cpuMetricsRepository.GetAll();
             var response = new AllCpuMetricsResponse()
             {
@@ -67,7 +60,7 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(mapper.Map<CpuMetricDto>(metric));
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
             if (_logger != null)

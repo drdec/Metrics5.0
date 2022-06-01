@@ -2,6 +2,9 @@
 using MetricsAgent.Models;
 using MetricsAgent.Services.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
+using Dapper;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace MetricsAgent.Services
@@ -9,133 +12,65 @@ namespace MetricsAgent.Services
 
     public class DotNetMetricsRepository : IDotNetMetricsRepository
     {
-        private const string ConnectionString = "server=localhost; user=root; database = metrics; password = 123456;";
+        private readonly IOptions<DatabaseOptions> _databaseOptions;
+
+        public DotNetMetricsRepository(IOptions<DatabaseOptions> databaseOptions)
+        {
+            _databaseOptions = databaseOptions;
+        }
 
         public void Create(DotNetMetric item)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
-
-            string cmdText =
-                $"insert into dotnet_metrics(value, time)  values({item.Value}, {item.Time.TotalSeconds})";
-
-            var cmd = new MySqlCommand(cmdText, connection);
-
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
+            connection.Execute(
+                $"insert into dotnet_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
         public void Delete(int id)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
-
-            string cmdText = $"delete from dotnet_metrics where id = {id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
+            connection.Execute($"delete from dotnet_metrics where id = {id}");
         }
 
         public IList<DotNetMetric> GetAll()
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
-
-            string cmdText = "select * from dotnet_metrics";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            var returnList = new List<DotNetMetric>();
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    returnList.Add(new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    });
-                }
-            }
-            return returnList;
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
+            return connection.Query<DotNetMetric>("select * from dotnet_metrics").ToList();
         }
 
         public IList<DotNetMetric> GetByPeriod(TimeSpan fromTime, TimeSpan toTime)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
 
-            string cmdText = $"select * from dotnet_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            var result = new List<DotNetMetric>();
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    result.Add(new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    });
-                }
-            }
-
-            return result;
+            return connection.Query<DotNetMetric>($"select * from dotnet_metrics " +
+                                                  $"where time >= {fromTime.TotalSeconds} " +
+                                                  $"and time <= {toTime.TotalSeconds}").ToList();
         }
 
         public DotNetMetric GetById(int id)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
 
-            string cmdText = $"select * from dotnet_metrics where id = {id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    return new DotNetMetric
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
-                    };
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            return connection.QuerySingle<DotNetMetric>($"select * from dotnet_metrics where id = {id}");
         }
 
         public void Update(DotNetMetric item)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
 
-            string cmdText =
-                $"update dotnet_metrics set value = {item.Value}, time = {item.Time.TotalSeconds} where id = {item.Id}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            cmd.Prepare();
-            cmd.ExecuteNonQuery();
+            connection.Execute(
+                $"update dotnet_metrics set value = {item.Value}, " +
+                $"time = {item.Time} where id = {item.Id}");
         }
 
         public int GetErrorsCount(TimeSpan fromTime, TimeSpan toTime)
         {
-            using var connection = new MySqlConnection(ConnectionString);
-            connection.Open();
+            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
+
+            return connection.Query<int>(
+                $"select value from dotnet_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}").Sum();
+
+            /*connection.Open();
 
             string cmdText = $"select value from dotnet_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
 
@@ -150,8 +85,7 @@ namespace MetricsAgent.Services
                     result += reader.GetInt32(0);
                 }
             }
-
-            return result;
+            */
         }
     }
 }

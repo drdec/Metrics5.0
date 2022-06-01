@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -13,8 +14,8 @@ namespace MetricsAgent.Controllers
     public class RamMetricsController : Controller
     {
 
-        private IRamMetricsRepository _ramMetricsRepository;
-        private ILogger<RamMetricsController> _logger;
+        private readonly IRamMetricsRepository _ramMetricsRepository;
+        private readonly ILogger<RamMetricsController> _logger;
 
 
         public RamMetricsController(
@@ -29,9 +30,9 @@ namespace MetricsAgent.Controllers
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricsCreateRequest request)
         {
-            RamMetric ramMetric = new RamMetric
+            RamMetric ramMetric = new ()
             {
-                Time = request.Time,
+                Time = request.Time.TotalSeconds,
                 Value = request.Value
             };
 
@@ -56,7 +57,7 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(new RamMetricDto
                 {
-                    Time = metric.Time,
+                    Time = TimeSpan.FromSeconds(metric.Time),
                     Value = metric.Value,
                     Id = metric.Id
                 });
