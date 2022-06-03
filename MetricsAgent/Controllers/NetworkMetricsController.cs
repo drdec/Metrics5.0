@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;

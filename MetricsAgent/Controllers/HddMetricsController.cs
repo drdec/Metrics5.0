@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -7,7 +6,6 @@ using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using IMapper = AutoMapper.IMapper;
-using Mapper = AutoMapper.Mapper;
 
 namespace MetricsAgent.Controllers
 {

@@ -1,10 +1,10 @@
 ﻿using MetricsAgent.Models;
 using MetricsAgent.Models.Requests;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models.ModelsDto;
@@ -45,6 +45,7 @@ namespace MetricsAgent.Controllers
 
             if (_logger != null)
                 _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
+            
 
             return Ok();
         }

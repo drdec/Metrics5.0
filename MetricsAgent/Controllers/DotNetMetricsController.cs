@@ -7,7 +7,6 @@ using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MetricsAgent.Services;
 
 namespace MetricsAgent.Controllers
 {
