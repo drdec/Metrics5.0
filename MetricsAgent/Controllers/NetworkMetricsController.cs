@@ -28,24 +28,6 @@ namespace MetricsAgent.Controllers
             _mapper = mapper;
         }
 
-
-        //[HttpPost("create")]
-        //public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
-        //{
-        //    NetworkMetric networkMetric = new()
-        //    {
-        //        Time = request.Time.TotalSeconds,
-        //        Value = request.Value
-        //    };
-
-        //    _networkMetricsRepository.Create(networkMetric);
-
-        //    if (_logger != null)
-        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", networkMetric);
-
-        //    return Ok();
-        //}
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -64,6 +46,13 @@ namespace MetricsAgent.Controllers
                 _logger.LogDebug("Успешно вернули данные network метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
+        }
+
+
+        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetNetworkMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            return Ok(_networkMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
         //[HttpGet("get-by-id")]
@@ -103,11 +92,21 @@ namespace MetricsAgent.Controllers
 
         //    return Ok();
         //}
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
+        //{
+        //    NetworkMetric networkMetric = new()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
-        [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetNetworkMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            return Ok(_networkMetricsRepository.GetByPeriod(fromTime, toTime));
-        }
+        //    _networkMetricsRepository.Create(networkMetric);
+
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", networkMetric);
+
+        //    return Ok();
+        //}
     }
 }

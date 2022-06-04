@@ -29,24 +29,6 @@ namespace MetricsAgent.Controllers
             _mapper = mapper;
         }
 
-
-        //[HttpPost("create")]
-        //public IActionResult Create([FromBody] RamMetricsCreateRequest request)
-        //{
-        //    RamMetric ramMetric = new ()
-        //    {
-        //        Time = request.Time.TotalSeconds,
-        //        Value = request.Value
-        //    };
-
-        //    _ramMetricsRepository.Create(ramMetric);
-
-        //    if (_logger != null)
-        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
-
-        //    return Ok();
-        //}
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -113,6 +95,23 @@ namespace MetricsAgent.Controllers
         //    {
         //        _logger.LogDebug($"network метрика успешно обновлена : {ramMetric}");
         //    }
+
+        //    return Ok();
+        //}
+
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] RamMetricsCreateRequest request)
+        //{
+        //    RamMetric ramMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
+
+        //    _ramMetricsRepository.Create(ramMetric);
+
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
 
         //    return Ok();
         //}

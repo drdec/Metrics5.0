@@ -28,6 +28,39 @@ namespace MetricsAgent.Controllers
             _mapper = mapper;
         }
 
+        [HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetDotNetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            return Ok(_dotNetMetricsRepository.GetErrorsCount(fromTime, toTime));
+        }
+
+        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
+
+        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            return Ok(_dotNetMetricsRepository.GetByPeriod(fromTime, toTime));
+        }
+
+        [HttpGet("get-all")]
+        public IActionResult GetAllItems()
+        {
+            var metrics = _dotNetMetricsRepository.GetAll();
+            var response = new AllDotNetMetricsResponse()
+            {
+                Metrics = new List<DotNetMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
+            }
+
+            if (_logger != null)
+                _logger.LogDebug("Успешно вернули данные dotNet метрики");
+
+            return response.IsEmpty() ? Ok("empty") : Ok(response);
+        }
+
         //[HttpPost("create")]
         //public IActionResult Create([FromBody] DotNetMetricsCreateRequest request)
         //{
@@ -73,41 +106,6 @@ namespace MetricsAgent.Controllers
 
         //    return Ok();
         //}
-
-
-        [HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetDotNetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            return Ok(_dotNetMetricsRepository.GetErrorsCount(fromTime, toTime));
-        }
-
-        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
-
-        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            return Ok(_dotNetMetricsRepository.GetByPeriod(fromTime, toTime));
-        }
-
-        [HttpGet("get-all")]
-        public IActionResult GetAllItems()
-        {
-            var metrics = _dotNetMetricsRepository.GetAll();
-            var response = new AllDotNetMetricsResponse()
-            {
-                Metrics = new List<DotNetMetricDto>()
-            };
-
-            foreach (var metric in metrics)
-            {
-                response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
-            }
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные dotNet метрики");
-
-            return response.IsEmpty() ? Ok("empty") : Ok(response);
-        }
-
         //[HttpGet("get-by-id")]
         //public IActionResult GetById(int id)
         //{

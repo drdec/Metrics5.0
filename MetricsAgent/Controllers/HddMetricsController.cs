@@ -14,11 +14,9 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class HddMetricsController : Controller
     {
-
         private readonly IHddMetricsRepository _hddMetricsRepository;
         private readonly ILogger<HddMetricsController> _logger;
         private readonly IMapper _mapper;
-
 
         public HddMetricsController(
             ILogger<HddMetricsController> logger,
@@ -29,24 +27,6 @@ namespace MetricsAgent.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-
-
-        //[HttpPost("create")]
-        //public IActionResult Create([FromBody] HddMetricsCreateRequest request)
-        //{
-        //    var hddMetric = new HddMetric()
-        //    {
-        //        Time = request.Time.TotalSeconds,
-        //        Value = request.Value
-        //    };
-
-        //    _hddMetricsRepository.Create(hddMetric);
-
-        //    if (_logger != null)
-        //        _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
-
-        //    return Ok();
-        //}
 
         [HttpGet("all")]
         public IActionResult GetAll()
@@ -74,6 +54,22 @@ namespace MetricsAgent.Controllers
             return Ok(_hddMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] HddMetricsCreateRequest request)
+        //{
+        //    var hddMetric = new HddMetric()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
+
+        //    _hddMetricsRepository.Create(hddMetric);
+
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
+
+        //    return Ok();
+        //}
         //[HttpGet("get-by-id")]
         //public IActionResult GetById(int id)
         //{

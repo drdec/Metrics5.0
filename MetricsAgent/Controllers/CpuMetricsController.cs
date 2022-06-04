@@ -15,11 +15,9 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
-
         private readonly ICpuMetricsRepository _cpuMetricsRepository;
         private readonly ILogger<CpuMetricsController> _logger;
         private readonly IMapper _mapper;
-
 
         public CpuMetricsController(
             IMapper mapper,
@@ -30,26 +28,7 @@ namespace MetricsAgent.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-
-
-        //[HttpPost("create")]
-        //public IActionResult Create([FromBody] CpuMetricCreateRequest request)
-        //{
-        //    CpuMetric cpuMetric = new ()
-        //    {
-        //        Time = request.Time.TotalSeconds,
-        //        Value = request.Value
-        //    };
-
-        //    _cpuMetricsRepository.Create(cpuMetric);
-
-        //    if (_logger != null)
-        //        _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
-            
-
-        //    return Ok();
-        //}
-
+        
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -70,18 +49,25 @@ namespace MetricsAgent.Controllers
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAllCluster(
+            [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            var result = _cpuMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return result == null ? Ok("sorry, data not found") : Ok(result);
+            return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
         }
+
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _cpuMetricsRepository.GetById(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
+        //    }
+
+        //    return result == null ? Ok("sorry, data not found") : Ok(result);
+        //}
 
         //[HttpDelete("delete")]
         //public IActionResult Delete(int id)
@@ -106,13 +92,22 @@ namespace MetricsAgent.Controllers
 
         //    return Ok();
         //}
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] CpuMetricCreateRequest request)
+        //{
+        //    CpuMetric cpuMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
+        //    _cpuMetricsRepository.Create(cpuMetric);
 
-        [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAllCluster(
-            [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
-        }
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
+            
+
+        //    return Ok();
+        //}
     }
 }
