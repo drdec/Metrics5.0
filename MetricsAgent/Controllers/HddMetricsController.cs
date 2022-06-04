@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -30,22 +31,22 @@ namespace MetricsAgent.Controllers
         }
 
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] HddMetricsCreateRequest request)
-        {
-            var hddMetric = new HddMetric()
-            {
-                Time = request.Time.TotalSeconds,
-                Value = request.Value
-            };
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] HddMetricsCreateRequest request)
+        //{
+        //    var hddMetric = new HddMetric()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
-            _hddMetricsRepository.Create(hddMetric);
+        //    _hddMetricsRepository.Create(hddMetric);
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         [HttpGet("all")]
         public IActionResult GetAll()
@@ -67,41 +68,47 @@ namespace MetricsAgent.Controllers
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            var result = _hddMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данные метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
+            return Ok(_hddMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _hddMetricsRepository.Delete(id);
-            if (_logger != null)
-            {
-                _logger.LogDebug($"hdd метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _hddMetricsRepository.GetById(id);
 
-        [HttpPut("Update")]
-        public IActionResult Update(HddMetric hddMetric)
-        {
-            _hddMetricsRepository.Update(hddMetric);
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данные метрики по id : metrics - {result}, id - {id}");
+        //    }
 
-            if (_logger != null)
-            {
-                _logger.LogDebug($"hdd метрика успешно обновлена : {hddMetric}");
-            }
+        //    return Ok(result);
+        //}
 
-            return Ok();
-        }
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _hddMetricsRepository.Delete(id);
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"hdd метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpPut("Update")]
+        //public IActionResult Update(HddMetric hddMetric)
+        //{
+        //    _hddMetricsRepository.Update(hddMetric);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"hdd метрика успешно обновлена : {hddMetric}");
+        //    }
+
+        //    return Ok();
+        //}
     }
 }

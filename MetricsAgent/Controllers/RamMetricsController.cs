@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using AutoMapper;
-using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
@@ -29,22 +30,22 @@ namespace MetricsAgent.Controllers
         }
 
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] RamMetricsCreateRequest request)
-        {
-            RamMetric ramMetric = new ()
-            {
-                Time = request.Time.TotalSeconds,
-                Value = request.Value
-            };
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] RamMetricsCreateRequest request)
+        //{
+        //    RamMetric ramMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
-            _ramMetricsRepository.Create(ramMetric);
+        //    _ramMetricsRepository.Create(ramMetric);
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         [HttpGet("all")]
         public IActionResult GetAll()
@@ -66,48 +67,54 @@ namespace MetricsAgent.Controllers
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
-        {
-            var result = _ramMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
-        }
-
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _ramMetricsRepository.Delete(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
-
-        [HttpPut("Update")]
-        public IActionResult Update(RamMetric ramMetric)
-        {
-            _ramMetricsRepository.Update(ramMetric);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно обновлена : {ramMetric}");
-            }
-
-            return Ok();
-        }
-
         [HttpGet("available")]
         public IActionResult IsAvailable()
         {
             return Ok(_ramMetricsRepository.IsAvailable());
         }
+
+        [HttpGet("get-by-period/fromTime/{fromTime}/toTime/{toTime}")]
+        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            return Ok(_ramMetricsRepository.GetByPeriod(fromTime, toTime));
+        }
+
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _ramMetricsRepository.GetById(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
+        //    }
+
+        //    return Ok(result);
+        //}
+
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _ramMetricsRepository.Delete(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"network метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpPut("Update")]
+        //public IActionResult Update(RamMetric ramMetric)
+        //{
+        //    _ramMetricsRepository.Update(ramMetric);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"network метрика успешно обновлена : {ramMetric}");
+        //    }
+
+        //    return Ok();
+        //}
     }
 }

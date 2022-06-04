@@ -55,6 +55,11 @@ namespace MetricsAgent
                 typeof(RamMetricJob),
                 "0/5 * * ? * * *"));
 
+            services.AddSingleton<HddMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                typeof(HddMetricJob),
+                "0/5 * * ? * * *"));
+
             services.AddHostedService<QuartzHostedService>();
 
             var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(
@@ -78,7 +83,7 @@ namespace MetricsAgent
                     Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
                 });
 
-            services.AddScoped<IHddMetricsRepository, HddMetricsRepository>().Configure<DatabaseOptions>(options =>
+            services.AddSingleton<IHddMetricsRepository, HddMetricsRepository>().Configure<DatabaseOptions>(options =>
             {
                 Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
             });

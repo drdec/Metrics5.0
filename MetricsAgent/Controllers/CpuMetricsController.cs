@@ -32,23 +32,23 @@ namespace MetricsAgent.Controllers
         }
 
 
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] CpuMetricCreateRequest request)
-        {
-            CpuMetric cpuMetric = new ()
-            {
-                Time = request.Time.TotalSeconds,
-                Value = request.Value
-            };
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] CpuMetricCreateRequest request)
+        //{
+        //    CpuMetric cpuMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
-            _cpuMetricsRepository.Create(cpuMetric);
+        //    _cpuMetricsRepository.Create(cpuMetric);
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
             
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         [HttpGet("all")]
         public IActionResult GetAll()
@@ -83,29 +83,29 @@ namespace MetricsAgent.Controllers
             return result == null ? Ok("sorry, data not found") : Ok(result);
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _cpuMetricsRepository.Delete(id);
-            if (_logger != null)
-            {
-                _logger.LogDebug($"cpu метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _cpuMetricsRepository.Delete(id);
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"cpu метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
 
-        [HttpPut("Update")]
-        public IActionResult Update(CpuMetric cpuMetric)
-        {
-            _cpuMetricsRepository.Update(cpuMetric);
+        //[HttpPut("Update")]
+        //public IActionResult Update(CpuMetric cpuMetric)
+        //{
+        //    _cpuMetricsRepository.Update(cpuMetric);
 
-            if (_logger != null)
-            {
-                _logger.LogDebug($"cpu метрика успешно обновлена : {cpuMetric}");
-            }
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"cpu метрика успешно обновлена : {cpuMetric}");
+        //    }
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
