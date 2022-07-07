@@ -42,71 +42,25 @@ namespace MetricsAgent.Controllers
                 response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные network метрики");
+            _logger?.LogDebug("Успешно вернули данные network метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
 
-        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetNetworkMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        [HttpGet("get-by-period-network-received/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetByPeriodNetworkReceived([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно вернули количество отправленных данных network метрики за период времени");
             return Ok(_networkMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
-        //[HttpGet("get-by-id")]
-        //public IActionResult GetById(int id)
-        //{
-        //    var result = _networkMetricsRepository.GetById(id);
+        [HttpGet("get-by-perid-network-sent")]
+        public IActionResult GetByPeriodNetworkSent([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            _logger?.LogDebug("Успешно вернули количесво отправленных данных network метрики за период времени");
+            return Ok(_networkMetricsRepository.GetByPeriodSent(fromTime, toTime));
+        }
 
-        //    if (_logger != null)
-        //    {
-        //        _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-        //    }
-
-        //    return Ok(result);
-        //}
-
-        //[HttpDelete("delete")]
-        //public IActionResult Delete(int id)
-        //{
-        //    _networkMetricsRepository.Delete(id);
-
-        //    if (_logger != null)
-        //    {
-        //        _logger.LogDebug($"network метрика успешно удалена : {id}");
-        //    }
-        //    return Ok();
-        //}
-
-        //[HttpPut("Update")]
-        //public IActionResult Update(NetworkMetric networkMetric)
-        //{
-        //    _networkMetricsRepository.Update(networkMetric);
-
-        //    if (_logger != null)
-        //    {
-        //        _logger.LogDebug($"network метрика успешно обновлена : {networkMetric}");
-        //    }
-
-        //    return Ok();
-        //}
-        //[HttpPost("create")]
-        //public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
-        //{
-        //    NetworkMetric networkMetric = new()
-        //    {
-        //        Time = request.Time.TotalSeconds,
-        //        Value = request.Value
-        //    };
-
-        //    _networkMetricsRepository.Create(networkMetric);
-
-        //    if (_logger != null)
-        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", networkMetric);
-
-        //    return Ok();
-        //}
     }
 }

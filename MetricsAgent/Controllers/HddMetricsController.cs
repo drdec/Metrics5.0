@@ -41,9 +41,8 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(_mapper.Map<HddMetricDto>(metric));
             }
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные hdd метрики");
+            
+            _logger?.LogDebug("Успешно вернули данные hdd метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
@@ -51,6 +50,7 @@ namespace MetricsAgent.Controllers
         [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
         public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно вернули данные hdd метрики за период времени");
             return Ok(_hddMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 

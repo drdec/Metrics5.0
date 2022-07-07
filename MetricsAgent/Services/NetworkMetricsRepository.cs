@@ -24,10 +24,10 @@ namespace MetricsAgent.Services
             connection.Execute($"insert into network_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
-        public void Delete(int id)
+        public void CreateSentCounter(NetworkMetric item)
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"delete from network_metrics where id = {id}");
+            connection.Execute($"insert into network_metrics_sent(value, time)  values({item.Value}, {item.Time})");
         }
 
         public IList<NetworkMetric> GetAll()
@@ -44,18 +44,12 @@ namespace MetricsAgent.Services
                 .ToList();
         }
 
-        public NetworkMetric GetById(int id)
+        public IList<NetworkMetric> GetByPeriodSent(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            return connection.QuerySingle<NetworkMetric>($"select * from network_metrics where id = {id}");
-        }
-
-        public void Update(NetworkMetric item)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute(
-                $"update network_metrics set value = {item.Value}, time = {item.Time} where id = {item.Id}");
+            return connection.Query<NetworkMetric>($"select * from network_metrics_sent " +
+                                                   $"where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}")
+                .ToList();
         }
     }
 }

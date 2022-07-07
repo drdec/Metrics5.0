@@ -25,22 +25,6 @@ namespace MetricsAgent.Services
             connection.Execute($"insert into cpu_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
-        public void Delete(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            connection.Execute($"delete from cpu_metrics where id = {id}");
-        }
-
-        public void Update(CpuMetric item)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            connection.Execute(
-                $"update cpu_metrics set value = {item.Value}, time = {item.Time} " +
-                $"where id = {item.Id}");
-        }
-
         public IList<CpuMetric> GetAll()
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
@@ -58,11 +42,5 @@ namespace MetricsAgent.Services
                                   $"and time <= {toTime.TotalSeconds}").ToList();
         }
 
-        public CpuMetric GetById(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            return connection.QuerySingle<CpuMetric>($"select * from cpu_metrics where id = {id}");
-        }
     }
 }

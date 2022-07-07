@@ -25,12 +25,6 @@ namespace MetricsAgent.Services
             connection.Execute($"insert into hdd_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
-        public void Delete(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"delete from hdd_metrics where id = {id}");
-        }
-
         public IList<HddMetric> GetAll()
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
@@ -44,19 +38,6 @@ namespace MetricsAgent.Services
             return connection.Query<HddMetric>($"select * from hdd_metrics where " +
                                                $"time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}")
                 .ToList();
-        }
-
-        public HddMetric GetById(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            return connection.QuerySingle<HddMetric>($"select * from hdd_metrics where id = {id}");
-        }
-
-        public void Update(HddMetric item)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"update hdd_metrics set value = {item.Value}, time = {item.Time} where id = {item.Id}");
         }
     }
 }

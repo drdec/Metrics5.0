@@ -1,10 +1,8 @@
-﻿using MetricsAgent.Models;
-using MetricsAgent.Models.Requests;
+﻿using MetricsAgent.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models.ModelsDto;
@@ -43,8 +41,7 @@ namespace MetricsAgent.Controllers
                 response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные cpu метрики");
+            _logger?.LogDebug("Успешно вернули данные cpu метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
@@ -53,6 +50,7 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsFromAllCluster(
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно вернули cpu метрику за период времени");
             return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 

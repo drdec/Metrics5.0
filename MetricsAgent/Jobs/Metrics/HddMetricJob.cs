@@ -5,6 +5,8 @@ using System;
 using System.Diagnostics;
 using MetricsAgent.Models;
 
+#pragma warning disable CA1416 
+
 namespace MetricsAgent.Jobs
 {
     public class HddMetricJob : IJob
@@ -15,7 +17,11 @@ namespace MetricsAgent.Jobs
         public HddMetricJob(IHddMetricsRepository hddMetricsRepository)
         {
             _hddMetricsRepository = hddMetricsRepository;
-            _hddCounter = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total");
+            _hddCounter = 
+                new PerformanceCounter(
+                    "PhysicalDisk",
+                    "% Disk Time",
+                    "_Total");
         }
 
         public Task Execute(IJobExecutionContext context)

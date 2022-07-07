@@ -31,6 +31,7 @@ namespace MetricsAgent.Controllers
         [HttpGet("errors-count/from/{fromTime}/to/{toTime}")]
         public IActionResult GetDotNetMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно врернули количество ошибок dotnet");
             return Ok(_dotNetMetricsRepository.GetErrorsCount(fromTime, toTime));
         }
 
@@ -38,6 +39,7 @@ namespace MetricsAgent.Controllers
 
         public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно вернули dotnet метрики за период времени");
             return Ok(_dotNetMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
@@ -54,9 +56,8 @@ namespace MetricsAgent.Controllers
             {
                 response.Metrics.Add(_mapper.Map<DotNetMetricDto>(metric));
             }
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные dotNet метрики");
+            
+            _logger?.LogDebug("Успешно вернули данные dotNet метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }

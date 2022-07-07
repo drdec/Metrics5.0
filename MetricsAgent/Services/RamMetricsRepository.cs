@@ -24,12 +24,6 @@ namespace MetricsAgent.Services
             connection.Execute($"insert into ram_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
-        public void Delete(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"delete from ram_metrics where id = {id}");
-        }
-
         public IList<RamMetric> GetAll()
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
@@ -42,18 +36,6 @@ namespace MetricsAgent.Services
             return connection.Query<RamMetric>($"select * from ram_metrics" +
                                                $" where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}")
                 .ToList();
-        }
-
-        public RamMetric GetById(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            return connection.QuerySingle<RamMetric>($"select * from ram_metrics where id = {id}");
-        }
-
-        public void Update(RamMetric item)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"update ram_metrics set value = {item.Value}, time = {item.Time} where id = {item.Id}");
         }
 
         public bool IsAvailable()

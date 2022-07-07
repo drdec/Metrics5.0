@@ -30,9 +30,10 @@ namespace MetricsManager
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddHttpClient();
+
             services.AddSingleton<IAgentPool<AgentInfo>, AgentPool>();
-
-
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

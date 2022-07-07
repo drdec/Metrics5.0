@@ -1,7 +1,7 @@
 ﻿using MetricsManager.Models;
 using System.Collections.Generic;
 
-namespace MetricsManager.Controllers
+namespace MetricsManager.Models
 {
     public interface IAgentPool<T>
     {

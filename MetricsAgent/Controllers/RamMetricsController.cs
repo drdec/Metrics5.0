@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using AutoMapper;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
@@ -43,8 +42,7 @@ namespace MetricsAgent.Controllers
                 response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные network метрики");
+            _logger?.LogDebug("Успешно вернули данные network метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
@@ -52,12 +50,14 @@ namespace MetricsAgent.Controllers
         [HttpGet("available")]
         public IActionResult IsAvailable()
         {
+            _logger.LogDebug("Успешно вернули доступность к метрике");
             return Ok(_ramMetricsRepository.IsAvailable());
         }
 
         [HttpGet("get-by-period/fromTime/{fromTime}/toTime/{toTime}")]
         public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger?.LogDebug("Успешно вернули данные network метрики за период времени");
             return Ok(_ramMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 

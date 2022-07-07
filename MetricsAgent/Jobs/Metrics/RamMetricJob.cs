@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using MetricsAgent.Models;
 using MetricsAgent.Services.Interfaces;
 
+#pragma warning disable CA1416 
+
 namespace MetricsAgent.Jobs
 {
     public class RamMetricJob : IJob

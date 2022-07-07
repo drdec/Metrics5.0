@@ -5,6 +5,8 @@ using MetricsAgent.Controllers.Interfaces;
 using MetricsAgent.Models;
 using Quartz;
 
+#pragma warning disable CA1416 
+
 namespace MetricsAgent.Jobs
 {
     public class CpuMetricJob : IJob
@@ -16,7 +18,11 @@ namespace MetricsAgent.Jobs
             ICpuMetricsRepository cpuMetricsRepository)
         {
             _cpuMetricsRepository = cpuMetricsRepository;
-            _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            _cpuCounter = 
+                new PerformanceCounter(
+                    "Processor",
+                    "% Processor Time", 
+                    "_Total");
         }
 
         public Task Execute(IJobExecutionContext context)
@@ -29,6 +35,7 @@ namespace MetricsAgent.Jobs
                 Time = time.TotalSeconds,
                 Value = (int)cpuUsageInPercents
             });
+
 
             return Task.CompletedTask;
         }

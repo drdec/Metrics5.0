@@ -21,7 +21,6 @@ namespace MetricsManager.Models
 
         public AgentInfo[] Get()
         {
-
             return _values.Values.ToArray();
         }
 

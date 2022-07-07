@@ -60,6 +60,16 @@ namespace MetricsAgent
                 typeof(HddMetricJob),
                 "0/5 * * ? * * *"));
 
+            services.AddSingleton<DotnetMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                typeof(DotnetMetricJob),
+                "0/5 * * ? * * *"));
+
+            services.AddSingleton<NetworkMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                typeof(NetworkMetricJob),
+                "0/5 * * ? * * *"));
+
             services.AddHostedService<QuartzHostedService>();
 
             var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(
@@ -77,7 +87,7 @@ namespace MetricsAgent
                 Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
             });
 
-            services.AddScoped<IDotNetMetricsRepository, DotNetMetricsRepository>()
+            services.AddSingleton<IDotNetMetricsRepository, DotNetMetricsRepository>()
                 .Configure<DatabaseOptions>(options =>
                 {
                     Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
@@ -88,7 +98,7 @@ namespace MetricsAgent
                 Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
             });
 
-            services.AddScoped<INetworkMetricsRepository, NetworkMetricsRepository>()
+            services.AddSingleton<INetworkMetricsRepository, NetworkMetricsRepository>()
                 .Configure<DatabaseOptions>(options =>
                 {
                     Configuration.GetSection("Settings:DatabaseOptions").Bind(options);

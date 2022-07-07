@@ -26,11 +26,13 @@ namespace MetricsAgent.Services
                 $"insert into dotnet_metrics(value, time)  values({item.Value}, {item.Time})");
         }
 
-        public void Delete(int id)
+        public void CreateWithErrors(DotNetMetric item)
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-            connection.Execute($"delete from dotnet_metrics where id = {id}");
+            connection.Execute(
+                $"insert into dotnet_metrics_error(value, time)  values({item.Value}, {item.Time})");
         }
+
 
         public IList<DotNetMetric> GetAll()
         {
@@ -46,46 +48,15 @@ namespace MetricsAgent.Services
                                                   $"where time >= {fromTime.TotalSeconds} " +
                                                   $"and time <= {toTime.TotalSeconds}").ToList();
         }
-
-        public DotNetMetric GetById(int id)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            return connection.QuerySingle<DotNetMetric>($"select * from dotnet_metrics where id = {id}");
-        }
-
-        public void Update(DotNetMetric item)
-        {
-            using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
-
-            connection.Execute(
-                $"update dotnet_metrics set value = {item.Value}, " +
-                $"time = {item.Time} where id = {item.Id}");
-        }
-
+        
         public int GetErrorsCount(TimeSpan fromTime, TimeSpan toTime)
         {
             using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
 
             return connection.Query<int>(
-                $"select value from dotnet_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}").Sum();
-
-            /*connection.Open();
-
-            string cmdText = $"select value from dotnet_metrics where time >= {fromTime.TotalSeconds} and time <= {toTime.TotalSeconds}";
-
-            using var cmd = new MySqlCommand(cmdText, connection);
-
-            int result = 0;
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    result += reader.GetInt32(0);
-                }
-            }
-            */
+                $"select value from dotnet_metrics_error " +
+                $"where time >= {fromTime.TotalSeconds} " +
+                $"and time <= {toTime.TotalSeconds}").Sum();
         }
     }
 }
