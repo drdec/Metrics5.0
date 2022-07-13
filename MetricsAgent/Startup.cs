@@ -31,16 +31,14 @@ namespace MetricsAgent
 
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services.AddFluentMigratorCore()
-                    .ConfigureRunner(rb => rb
-                    .AddMySql5()
-                    .WithGlobalConnectionString(
-                        Configuration.GetSection("Settings:DatabaseOptions:ConnectionString").Value)
-                    .ScanIn(typeof(Startup).Assembly).For.Migrations())
-                    .AddLogging(lb => lb
-                    .AddFluentMigratorConsole());
+                        .ConfigureRunner(rb => rb
+                        .AddMySql5()
+                        .WithGlobalConnectionString(
+                            Configuration.GetSection("Settings:DatabaseOptions:ConnectionString").Value)
+                        .ScanIn(typeof(Startup).Assembly).For.Migrations())
+                        .AddLogging(lb => lb
+                        .AddFluentMigratorConsole());
 
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<IJobFactory, SingletonJobFactory>();

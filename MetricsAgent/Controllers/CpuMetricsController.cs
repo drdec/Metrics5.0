@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
+using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
+using Quartz;
 
 namespace MetricsAgent.Controllers
 {
@@ -51,7 +53,23 @@ namespace MetricsAgent.Controllers
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
             _logger?.LogDebug("Успешно вернули cpu метрику за период времени");
-            return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
+            //return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
+
+            IList<CpuMetric> metrics = _cpuMetricsRepository.GetByPeriod(fromTime, toTime);
+
+            AllCpuMetricsResponse response = new AllCpuMetricsResponse()
+            {
+                Metrics = new List<CpuMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                CpuMetricDto metricDto = _mapper.Map<CpuMetricDto>(metric);
+
+                response.Metrics.Add(metricDto);
+            }
+
+            return Ok(response);
         }
 
         //[HttpGet("get-by-id")]

@@ -1,19 +1,18 @@
-using MetricsManager.Controllers;
 using MetricsManager.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FluentMigrator.Runner;
+using MetricsManager.Converter;
+using MetricsManager.Migrations;
+using MetricsManager.Services;
+using MetricsManager.Services.Impl;
+using Polly;
 
 namespace MetricsManager
 {
@@ -26,15 +25,39 @@ namespace MetricsManager
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddFluentMigratorCore()
+                .ConfigureRunner(rb => rb
+                    .AddMySql5()
+                    .WithGlobalConnectionString(
+                        Configuration.GetSection("Settings:DatabaseOptions:ConnectionString").Value)
+                    .ScanIn(typeof(FirstMigration).Assembly).For.Migrations())
+                .AddLogging(lb => lb
+                    .AddFluentMigratorConsole());
+
             services.AddHttpClient();
 
-            services.AddSingleton<IAgentPool<AgentInfo>, AgentPool>();
-            
-            services.AddControllers();
+            services.AddHttpClient<IMetricsAgentClient, MetricsAgentClient>()
+                .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(retryCount: 3,
+                    sleepDurationProvider: (attemptCount) => TimeSpan.FromMilliseconds(2000),
+                    onRetry: (exception, sleepDuration, attemptNumber, context) =>
+                    {
+
+                    }));
+
+            services.AddSingleton<IMetricAgentRepository, MetricAgentRepository>()
+                .Configure<DatabaseOptions>(options =>
+                {
+                    Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+                });
+
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new CustomTimeSpanConverter()));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "MetricsManager", Version = "v1" });
@@ -47,10 +70,13 @@ namespace MetricsManager
                 });
             });
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
+            IMigrationRunner migrationRunner)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -64,10 +90,9 @@ namespace MetricsManager
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+            migrationRunner.MigrateUp();
         }
     }
 }
