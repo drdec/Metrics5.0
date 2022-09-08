@@ -9,9 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsManagerTests", "Metr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsAgentTest", "MetricsAgentTest\MetricsAgentTest.csproj", "{116C5585-36FE-4CC9-AF4D-D7261AF883C9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleSample", "ConsoleSample\ConsoleSample.csproj", "{4642D6DD-369A-45BF-8817-7AC41B77CEDE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetricsAgent", "MetricsAgent\MetricsAgent.csproj", "{93CEADF7-2677-427D-B6A9-B6D8F33BA747}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6A59D3F-4072-4A5E-A0B9-FAF767F1EC19}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,10 +34,6 @@ Global
 		{116C5585-36FE-4CC9-AF4D-D7261AF883C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{116C5585-36FE-4CC9-AF4D-D7261AF883C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{116C5585-36FE-4CC9-AF4D-D7261AF883C9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4642D6DD-369A-45BF-8817-7AC41B77CEDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4642D6DD-369A-45BF-8817-7AC41B77CEDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4642D6DD-369A-45BF-8817-7AC41B77CEDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4642D6DD-369A-45BF-8817-7AC41B77CEDE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{93CEADF7-2677-427D-B6A9-B6D8F33BA747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{93CEADF7-2677-427D-B6A9-B6D8F33BA747}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93CEADF7-2677-427D-B6A9-B6D8F33BA747}.Release|Any CPU.ActiveCfg = Release|Any CPU

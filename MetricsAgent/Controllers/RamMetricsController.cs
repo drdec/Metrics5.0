@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using MetricsAgent.Models;
+﻿using System;
+using System.Collections.Generic;
+using AutoMapper;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
@@ -13,34 +14,18 @@ namespace MetricsAgent.Controllers
     public class RamMetricsController : Controller
     {
 
-        private IRamMetricsRepository _ramMetricsRepository;
-        private ILogger<RamMetricsController> _logger;
-
+        private readonly IRamMetricsRepository _ramMetricsRepository;
+        private readonly ILogger<RamMetricsController> _logger;
+        private readonly IMapper _mapper;
 
         public RamMetricsController(
             ILogger<RamMetricsController> logger,
-            IRamMetricsRepository ramMetricsRepository)
+            IRamMetricsRepository ramMetricsRepository,
+            IMapper mapper)
         {
             _ramMetricsRepository = ramMetricsRepository;
             _logger = logger;
-        }
-
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] RamMetricsCreateRequest request)
-        {
-            RamMetric ramMetric = new RamMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _ramMetricsRepository.Create(ramMetric);
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
-
-            return Ok();
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -54,62 +39,81 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new RamMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<RamMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные network метрики");
+            _logger?.LogDebug("Успешно вернули данные network метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
-        {
-            var result = _ramMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
-        }
-
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _ramMetricsRepository.Delete(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
-
-        [HttpPut("Update")]
-        public IActionResult Update(RamMetric ramMetric)
-        {
-            _ramMetricsRepository.Update(ramMetric);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно обновлена : {ramMetric}");
-            }
-
-            return Ok();
-        }
-
         [HttpGet("available")]
-        public IActionResult GetRamMetrics()
+        public IActionResult IsAvailable()
         {
-            return Ok();
+            _logger.LogDebug("Успешно вернули доступность к метрике");
+            return Ok(_ramMetricsRepository.IsAvailable());
         }
+
+        [HttpGet("get-by-period/fromTime/{fromTime}/toTime/{toTime}")]
+        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        {
+            _logger?.LogDebug("Успешно вернули данные network метрики за период времени");
+            return Ok(_ramMetricsRepository.GetByPeriod(fromTime, toTime));
+        }
+
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _ramMetricsRepository.GetById(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
+        //    }
+
+        //    return Ok(result);
+        //}
+
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _ramMetricsRepository.Delete(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"network метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpPut("Update")]
+        //public IActionResult Update(RamMetric ramMetric)
+        //{
+        //    _ramMetricsRepository.Update(ramMetric);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"network метрика успешно обновлена : {ramMetric}");
+        //    }
+
+        //    return Ok();
+        //}
+
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] RamMetricsCreateRequest request)
+        //{
+        //    RamMetric ramMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
+
+        //    _ramMetricsRepository.Create(ramMetric);
+
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую network метрику: {0}", ramMetric);
+
+        //    return Ok();
+        //}
     }
 }

@@ -1,13 +1,13 @@
-﻿using MetricsAgent.Models;
-using MetricsAgent.Models.Requests;
-using Microsoft.AspNetCore.Http;
+﻿using MetricsAgent.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
+using AutoMapper;
 using MetricsAgent.Controllers.Interfaces;
-using MetricsAgent.Models.Dto;
+using MetricsAgent.Models;
+using MetricsAgent.Models.ModelsDto;
+using Quartz;
 
 namespace MetricsAgent.Controllers
 {
@@ -15,37 +15,20 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
-
-        private ICpuMetricsRepository _cpuMetricsRepository;
-        private ILogger<CpuMetricsController> _logger;
-
+        private readonly ICpuMetricsRepository _cpuMetricsRepository;
+        private readonly ILogger<CpuMetricsController> _logger;
+        private readonly IMapper _mapper;
 
         public CpuMetricsController(
+            IMapper mapper,
             ILogger<CpuMetricsController> logger,
             ICpuMetricsRepository cpuMetricsRepository)
         {
             _cpuMetricsRepository = cpuMetricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
-
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] CpuMetricCreateRequest request)
-        {
-            CpuMetric cpuMetric = new CpuMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _cpuMetricsRepository.Create(cpuMetric);
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
-
-            return Ok();
-        }
-
+        
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -57,78 +40,90 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new CpuMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<CpuMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные cpu метрики");
+            _logger?.LogDebug("Успешно вернули данные cpu метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
-        }
-
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
-        {
-            var result = _cpuMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
-        }
-
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _cpuMetricsRepository.Delete(id);
-            if (_logger != null)
-            {
-                _logger.LogDebug($"cpu метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
-
-        [HttpPut("Update")]
-        public IActionResult Update(CpuMetric cpuMetric)
-        {
-            _cpuMetricsRepository.Update(cpuMetric);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"cpu метрика успешно обновлена : {cpuMetric}");
-            }
-
-            return Ok();
-        }
-
-
-        [HttpGet("sql-test")]
-        public IActionResult TryToSqlLite()
-        {
-            string cs = "Data Source=:memory:";
-            string stm = "SELECT SQLITE_VERSION()";
-            using (var con = new SQLiteConnection(cs))
-            {
-                con.Open();
-                using var cmd = new SQLiteCommand(stm, con);
-                string version = cmd.ExecuteScalar().ToString();
-                return Ok(version);
-
-            }
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAllCluster(
             [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
+            _logger?.LogDebug("Успешно вернули cpu метрику за период времени");
+            //return Ok(_cpuMetricsRepository.GetByPeriod(fromTime, toTime));
+
+            IList<CpuMetric> metrics = _cpuMetricsRepository.GetByPeriod(fromTime, toTime);
+
+            AllCpuMetricsResponse response = new AllCpuMetricsResponse()
+            {
+                Metrics = new List<CpuMetricDto>()
+            };
+
+            foreach (var metric in metrics)
+            {
+                CpuMetricDto metricDto = _mapper.Map<CpuMetricDto>(metric);
+
+                response.Metrics.Add(metricDto);
+            }
+
+            return Ok(response);
         }
+
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _cpuMetricsRepository.GetById(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
+        //    }
+
+        //    return result == null ? Ok("sorry, data not found") : Ok(result);
+        //}
+
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _cpuMetricsRepository.Delete(id);
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"cpu метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpPut("Update")]
+        //public IActionResult Update(CpuMetric cpuMetric)
+        //{
+        //    _cpuMetricsRepository.Update(cpuMetric);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"cpu метрика успешно обновлена : {cpuMetric}");
+        //    }
+
+        //    return Ok();
+        //}
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] CpuMetricCreateRequest request)
+        //{
+        //    CpuMetric cpuMetric = new ()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
+
+        //    _cpuMetricsRepository.Create(cpuMetric);
+
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую cpu метрику: {0}", cpuMetric);
+            
+
+        //    return Ok();
+        //}
     }
 }

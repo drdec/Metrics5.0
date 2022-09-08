@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using MetricsAgent.Controllers.Interfaces;
+using AutoMapper;
 using MetricsAgent.Models;
-using MetricsAgent.Models.Dto;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
@@ -15,34 +14,18 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class NetworkMetricsController : Controller
     {
-        private INetworkMetricsRepository _networkMetricsRepository;
-        private ILogger<NetworkMetricsController> _logger;
-
+        private readonly INetworkMetricsRepository _networkMetricsRepository;
+        private readonly ILogger<NetworkMetricsController> _logger;
+        private readonly IMapper _mapper;
 
         public NetworkMetricsController(
             ILogger<NetworkMetricsController> logger,
-            INetworkMetricsRepository networkMetricsRepository)
+            INetworkMetricsRepository networkMetricsRepository,
+            IMapper mapper)
         {
             _networkMetricsRepository = networkMetricsRepository;
             _logger = logger;
-        }
-
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
-        {
-            NetworkMetric networkMetric = new NetworkMetric
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _networkMetricsRepository.Create(networkMetric);
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую network метрику: {0}", networkMetric);
-
-            return Ok();
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -56,62 +39,28 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new NetworkMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<NetworkMetricDto>(metric));
             }
 
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные network метрики");
+            _logger?.LogDebug("Успешно вернули данные network метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+
+        [HttpGet("get-by-period-network-received/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetByPeriodNetworkReceived([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            var result = _networkMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данне метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
+            _logger?.LogDebug("Успешно вернули количество отправленных данных network метрики за период времени");
+            return Ok(_networkMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
+        [HttpGet("get-by-perid-network-sent")]
+        public IActionResult GetByPeriodNetworkSent([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            _networkMetricsRepository.Delete(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно удалена : {id}");
-            }
-            return Ok();
+            _logger?.LogDebug("Успешно вернули количесво отправленных данных network метрики за период времени");
+            return Ok(_networkMetricsRepository.GetByPeriodSent(fromTime, toTime));
         }
 
-        [HttpPut("Update")]
-        public IActionResult Update(NetworkMetric networkMetric)
-        {
-            _networkMetricsRepository.Update(networkMetric);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"network метрика успешно обновлена : {networkMetric}");
-            }
-
-            return Ok();
-        }
-
-        [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetNetworkMetrics([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            return Ok();
-        }
     }
 }

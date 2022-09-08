@@ -14,10 +14,10 @@ namespace MetricsManagerTests
     {
         private CpuMetricsController _cpuMetricsController;
 
-        public CpuMetricsControllerTests()
-        {
-            _cpuMetricsController = new CpuMetricsController();
-        }
+        //public CpuMetricsControllerTests()
+        //{
+        //    _cpuMetricsController = new CpuMetricsController();
+        //}
 
         [Fact]
         public void GetMetricsFromAgent_ReturnOk()

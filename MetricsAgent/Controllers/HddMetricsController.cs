@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MetricsAgent.Models;
 using MetricsAgent.Models.ModelsDto;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using IMapper = AutoMapper.IMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -12,35 +14,18 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class HddMetricsController : Controller
     {
-
-        private IHddMetricsRepository _hddMetricsRepository;
-        private ILogger<HddMetricsController> _logger;
-
+        private readonly IHddMetricsRepository _hddMetricsRepository;
+        private readonly ILogger<HddMetricsController> _logger;
+        private readonly IMapper _mapper;
 
         public HddMetricsController(
             ILogger<HddMetricsController> logger,
-            IHddMetricsRepository hddMetricsRepository)
+            IHddMetricsRepository hddMetricsRepository,
+            IMapper mapper)
         {
             _hddMetricsRepository = hddMetricsRepository;
             _logger = logger;
-        }
-
-
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] HddMetricsCreateRequest request)
-        {
-            var hddMetric = new HddMetric()
-            {
-                Time = request.Time,
-                Value = request.Value
-            };
-
-            _hddMetricsRepository.Create(hddMetric);
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
-
-            return Ok();
+            _mapper = mapper;
         }
 
         [HttpGet("all")]
@@ -54,55 +39,72 @@ namespace MetricsAgent.Controllers
 
             foreach (var metric in metrics)
             {
-                response.Metrics.Add(new HddMetricDto
-                {
-                    Time = metric.Time,
-                    Value = metric.Value,
-                    Id = metric.Id
-                });
+                response.Metrics.Add(_mapper.Map<HddMetricDto>(metric));
             }
-
-            if (_logger != null)
-                _logger.LogDebug("Успешно вернули данные hdd метрики");
+            
+            _logger?.LogDebug("Успешно вернули данные hdd метрики");
 
             return response.IsEmpty() ? Ok("empty") : Ok(response);
         }
 
-        [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+        [HttpGet("get-by-period/from/{fromTime}/to/{toTime}")]
+        public IActionResult GetByPeriod([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            var result = _hddMetricsRepository.GetById(id);
-
-            if (_logger != null)
-            {
-                _logger.LogDebug($"Успешно вернули данные метрики по id : metrics - {result}, id - {id}");
-            }
-
-            return Ok(result);
+            _logger?.LogDebug("Успешно вернули данные hdd метрики за период времени");
+            return Ok(_hddMetricsRepository.GetByPeriod(fromTime, toTime));
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete(int id)
-        {
-            _hddMetricsRepository.Delete(id);
-            if (_logger != null)
-            {
-                _logger.LogDebug($"hdd метрика успешно удалена : {id}");
-            }
-            return Ok();
-        }
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] HddMetricsCreateRequest request)
+        //{
+        //    var hddMetric = new HddMetric()
+        //    {
+        //        Time = request.Time.TotalSeconds,
+        //        Value = request.Value
+        //    };
 
-        [HttpPut("Update")]
-        public IActionResult Update(HddMetric hddMetric)
-        {
-            _hddMetricsRepository.Update(hddMetric);
+        //    _hddMetricsRepository.Create(hddMetric);
 
-            if (_logger != null)
-            {
-                _logger.LogDebug($"hdd метрика успешно обновлена : {hddMetric}");
-            }
+        //    if (_logger != null)
+        //        _logger.LogDebug("Успешно добавили новую hdd метрику: {0}", hddMetric);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
+        //[HttpGet("get-by-id")]
+        //public IActionResult GetById(int id)
+        //{
+        //    var result = _hddMetricsRepository.GetById(id);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"Успешно вернули данные метрики по id : metrics - {result}, id - {id}");
+        //    }
+
+        //    return Ok(result);
+        //}
+
+        //[HttpDelete("delete")]
+        //public IActionResult Delete(int id)
+        //{
+        //    _hddMetricsRepository.Delete(id);
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"hdd метрика успешно удалена : {id}");
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpPut("Update")]
+        //public IActionResult Update(HddMetric hddMetric)
+        //{
+        //    _hddMetricsRepository.Update(hddMetric);
+
+        //    if (_logger != null)
+        //    {
+        //        _logger.LogDebug($"hdd метрика успешно обновлена : {hddMetric}");
+        //    }
+
+        //    return Ok();
+        //}
     }
 }

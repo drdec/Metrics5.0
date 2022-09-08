@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using MetricsManager.Services;
 
 namespace MetricsManager.Controllers
 {
@@ -9,43 +10,38 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class AgentsController : ControllerBase
     {
+        private readonly IMetricAgentRepository _metricAgentRepository;
 
-        private IAgentPool<AgentInfo> _agentPool;
-
-        public AgentsController(IAgentPool<AgentInfo> agentPool)
+        public AgentsController(
+            IMetricAgentRepository metricAgentRepository)
         {
-            _agentPool = agentPool;
+            _metricAgentRepository = metricAgentRepository;
         }
 
         [HttpPost("register")]
         public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
         {
-            if (agentInfo != null)
-            {
-                _agentPool.Add(agentInfo);
-            }
+            _metricAgentRepository.Create(agentInfo);
             return Ok();
         }
 
         [HttpPut("enable/{agentId}")]
         public IActionResult EnableAgentById([FromRoute] int agentId)
         {
-            if (_agentPool.Values.ContainsKey(agentId))
-                _agentPool.Values[agentId].Enable = true;
+            _metricAgentRepository.Enable(agentId);
             return Ok();
         }
         [HttpPut("disable/{agentId}")]
         public IActionResult DisableAgentById([FromRoute] int agentId)
         {
-            if (_agentPool.Values.ContainsKey(agentId))
-                _agentPool.Values[agentId].Enable = false;
+            _metricAgentRepository.Disable(agentId);
             return Ok();
         }
 
         [HttpGet("get")]
         public IActionResult GetAllAgents()
         {
-            return Ok(_agentPool.Get());
+            return Ok(_metricAgentRepository.Get());
         }
 
     }
